@@ -13,10 +13,13 @@ class Activity extends Model
         'contact_id',
         'aktivita',
         'datumCas',
+        'koniec',
         'poznamka',
         'volane',
         'dovolane',
-        'dohodnute'
+        'dohodnute',
+        'miesto_stretnutia',
+        'online_meeting'
     ];
 
     public function contact()

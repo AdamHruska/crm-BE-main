@@ -26,6 +26,19 @@ class contactController extends Controller
         ]);
     }
 
+    public function getAllContacts()
+    {
+        $user = auth()->user();
+
+        $contacts = Contact::where('author_id', $user->id)->get();
+
+        return response()->json([
+        'contacts' => $contacts,
+        'message' => 'Contacts retrieved successfully',
+        'status' => 200
+        ]);
+    }
+
     // public function addContact(Request $request)
     // {
     //     $user = auth()->user();
@@ -60,14 +73,14 @@ class contactController extends Controller
         $validatedData = $request->validate([
             'meno' => 'required|string|max:255',
             'priezvisko' => 'required|string|max:255',
-            'cislo' => 'required|string|max:255',
-            'email' => 'required|email|unique:contacts,email',
+            'cislo' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:contacts,email',
             'odporucitel' => 'required|string|max:255',
             'adresa' => 'required|string|max:255',
             'vek' => 'required|integer|min:1|max:150', // Ensure valid age input
             'zamestanie' => 'required|string|max:255',
             'poznamka' => 'nullable|string',
-            'Investicny_dotaznik' => 'required|date'
+            'Investicny_dotaznik' => 'nullable|date'
         ]);
 
         // Calculate the year of birth from the age
@@ -86,7 +99,9 @@ class contactController extends Controller
         $contact->rok_narodenia = $yearOfBirth; // Store calculated year of birth
         $contact->zamestanie = $validatedData['zamestanie'];
         $contact->poznamka = $validatedData['poznamka'];
-        $contact->Investicny_dotaznik = $validatedData['Investicny_dotaznik'];
+        if (isset($validatedData['Investicny_dotaznik'])) {
+            $contact->Investicny_dotaznik = $validatedData['Investicny_dotaznik'];
+        }
         $contact->author_id = $user->id;
         $contact->save();
 
@@ -142,14 +157,14 @@ class contactController extends Controller
             'meno' => 'required|string|max:255',
             'priezvisko' => 'required|string|max:255',
             'poradca' => 'required|string|max:255',
-            'cislo' => 'required|string|max:255',
-            'email' => 'required|email',
+            'cislo' => 'nullable|string|max:255',
+            'email' => 'nullable|email',
             'odporucitel' => 'required|string|max:255',
             'adresa' => 'required|string|max:255',
             'vek' => 'required|integer|min:1|max:150', // Validate age input
             'zamestanie' => 'required|string|max:255',
             'poznamka' => 'nullable|string',
-            'Investicny_dotaznik' => 'required|date',
+            'Investicny_dotaznik' => 'nullable|date',
             'author_id' => 'required|integer'
         ]);
     
@@ -190,6 +205,7 @@ class contactController extends Controller
             'status' => 200
         ]);
     }
+    
     
 
 
@@ -262,5 +278,35 @@ class contactController extends Controller
         //     'users' => $users,
             
         // ]);
+    }
+
+    public function updateEmail(Request $request, $id)
+    {
+        // Validate the email
+        $validated = $request->validate([
+            'email' => 'required|email|unique:contacts,email,' . $id, // Ensure the email is unique except for the current contact
+        ]);
+
+        // Find the contact
+        $contact = Contact::find($id);
+
+        // Check if contact exists
+        if (!$contact) {
+            return response()->json([
+                'message' => 'Contact not found',
+                'status' => 404
+            ], 404);
+        }
+
+        // Update the email
+        $contact->email = $validated['email'];
+        $contact->save();
+
+        // Return the updated contact
+        return response()->json([
+            'contact' => $contact,
+            'message' => 'Email updated successfully',
+            'status' => 200
+        ]);
     }
 }

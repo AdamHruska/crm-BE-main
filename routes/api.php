@@ -32,12 +32,14 @@ Route::controller(AuthController::class)->group(function () {
 });
 Route::controller(contactController::class)->group(function () {
     Route::get('contacts', 'getContacts');
+    Route::get('all-contacts', 'getAllContacts');
     Route::get('contact/{id}', 'getSingleContact');
     Route::post('post-create-contact', 'addContact');
     Route::put('post-update-contact/{id}', 'updateContact');
     Route::delete('delete-delete-contact/{id}', 'deleteContact');
     Route::get('get-users', 'getUsers');   
     Route::get('search-contacts', 'searchContacts'); 
+    Route::patch('contact/{id}/email', 'updateEmail');
 });
 
 Route::controller(ActivityController::class)->group(function () {
@@ -46,6 +48,8 @@ Route::controller(ActivityController::class)->group(function () {
     Route::post('add-activity', 'addActivity');
     Route::put('update-activities/{id}', 'updateActivity');
     Route::delete('delete-activities/{id}', 'deleteActivity');
+    Route::get('get-activities-diary', 'getActivitiesDiary');
+    Route::get('activities/{id}', 'getActivityById');
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

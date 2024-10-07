@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Activity;
+use App\Models\Contact;
 
 class ActivityController extends Controller
 {
@@ -44,10 +45,13 @@ class ActivityController extends Controller
             'contact_id' => 'required|integer|exists:contacts,id',
             'aktivita' => 'required|string|max:255',
             'datumCas' => 'required|date',
+            'koniec' => 'nullable|date',
             'poznamka' => 'nullable|string',
-            'volane' => 'required|integer',
-            'dovolane' => 'required|integer',
-            'dohodnute' => 'required|integer'
+            'volane' => 'nullable|integer',
+            'dovolane' => 'nullable|integer',
+            'dohodnute' => 'nullable|integer',
+            'miesto_stretnutia' => 'nullable|string',
+            'online_meeting' => 'nullable|boolean'
         ]);
 
         $activity = Activity::create($validatedData);
@@ -65,10 +69,13 @@ class ActivityController extends Controller
         $validatedData = $request->validate([
             'aktivita' => 'required|string|max:255',
             'datumCas' => 'required|date',
+            'koniec' => 'nullable|date',
             'poznamka' => 'nullable|string',
-            'volane' => 'required|integer',
-            'dovolane' => 'required|integer',
-            'dohodnute' => 'required|integer'
+            'volane' => 'nullable|integer',
+            'dovolane' => 'nullable|integer',
+            'dohodnute' => 'nullable|integer',
+            'miesto_stretnutia' => 'nullable|string',
+            'online_meeting' => 'nullable|boolean'
         ]);
 
         $activity = Activity::find($id);
@@ -107,4 +114,42 @@ class ActivityController extends Controller
             ], 404);
         }
     }
+
+    public function getActivitiesDiary()
+{
+    // Get the logged-in user
+    $user = auth()->user();
+
+    // Get the IDs of all contacts belonging to this user
+    $contactIds = Contact::where('author_id', $user->id)->pluck('id');
+
+    // Retrieve all activities associated with these contact IDs
+    $activities = Activity::whereIn('contact_id', $contactIds)->get();
+
+    // Return the activities in the response
+    return response()->json([
+        'activities' => $activities,
+        'message' => 'Activities retrieved successfully',
+        'status' => 200
+    ]);
+}
+
+public function getActivityById($id)
+{
+    $activity = Activity::find($id);
+
+    if (!$activity) {
+        return response()->json([
+            'message' => 'Activity not found',
+            'status' => 404
+        ], 404);
+    }
+
+    return response()->json([
+        'activity' => $activity,
+        'message' => 'Activity retrieved successfully',
+        'status' => 200
+    ]);
+}
+    
 }
