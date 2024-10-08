@@ -2,10 +2,7 @@
     "version": 2,
     "framework": null,
     "functions": {
-        "api/*.php": {
-            "runtime": "vercel-php@0.6.0",
-            "includeFiles": "**"
-        }
+        "api/index.php": { "runtime": "vercel-php@0.6.0" }
     },
     "routes": [
         {
@@ -14,9 +11,8 @@
         }
     ],
     "env": {
-        "APP_NAME": "Laravel Vercel",
         "APP_ENV": "production",
-        "APP_DEBUG": "false",
+        "APP_DEBUG": "true",
         "APP_URL": "https://crm-be-main.vercel.app",
 
         "APP_CONFIG_CACHE": "/tmp/config.php",
@@ -29,21 +25,5 @@
         "CACHE_DRIVER": "array",
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie"
-    },
-    "builds": [
-        {
-            "src": "api/index.php",
-            "use": "@vercel/php",
-            "config": {
-                "php": {
-                    "version": "8.1",
-                    "extensions": ["openssl"]
-                }
-            }
-        },
-        {
-            "src": "public/**",
-            "use": "@vercel/static"
-        }
-    ]
+    }
 }
