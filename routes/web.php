@@ -9,6 +9,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\contactController;
 use App\Http\Controllers\ActivityController;
 
+
+Route::controller(AuthController::class)->group(function () {
+    Route::post('/login', 'login');
+    Route::post('/register', 'register');
+    Route::post('logout', 'logout');
+    Route::post('refresh', 'refresh');
+    Route::post('add-share-id/{id}', 'addShareID');
+    Route::post('null-share-id', 'setShareIDtoNull');
+});
 /*
 |--------------------------------------------------------------------------
 | Web Routes
