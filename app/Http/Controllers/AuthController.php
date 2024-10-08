@@ -98,6 +98,35 @@ class AuthController extends Controller
         ]);
     }
 
+    public function addShareID($id) {
+        $user = Auth::user();
+        if($user->share_user_id != null) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Share ID already added',
+            ], 406);
+        } else {  
+            $user->share_user_id = $id;
+            $user->save();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Share ID added successfully',
+                'user' => $user,
+            ]);
+        }
+    }
+
+    public function setShareIDtoNull() {
+        $user = Auth::user();
+        $user->share_user_id = null;
+        $user->save();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Share ID set to null',
+            'user' => $user,
+        ]);
+    }
+
     public function logout()
     {
         Auth::logout();
@@ -116,6 +145,14 @@ class AuthController extends Controller
                 'token' => Auth::refresh(),
                 'type' => 'bearer',
             ]
+        ]);
+    }
+
+    public function test()
+    {
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Test successful',
         ]);
     }
 }

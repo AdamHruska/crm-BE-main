@@ -25,10 +25,13 @@ use Illuminate\Support\Facades\Auth;
 // })->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
 
 Route::controller(AuthController::class)->group(function () {
-    Route::post('login', 'login');
-    Route::post('register', 'register');
+    Route::post('/login', 'login');
+    Route::post('/register', 'register');
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
+    Route::post('add-share-id/{id}', 'addShareID');
+    Route::post('null-share-id', 'setShareIDtoNull');
+    Route::get('test', 'test');
 });
 Route::controller(contactController::class)->group(function () {
     Route::get('contacts', 'getContacts');
