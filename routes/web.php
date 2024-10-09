@@ -67,12 +67,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::prefix('api')->group(function () {
-    // Place one of your API routes here
-    Route::get('/test', function () {
-        return response()->json(['message' => 'API is working']);
-    });
-});
 
 // Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
 //     $request->fulfill();
