@@ -25,6 +25,10 @@ use Illuminate\Support\Facades\Auth;
 //     return back()->with('message', 'Verification link sent!');
 // })->middleware(['auth:api', 'throttle:6,1'])->name('verification.send');
 
+Route::get('test', function() {
+    return "test";
+});
+
 Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
     Route::post('register', 'register');
