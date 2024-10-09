@@ -147,4 +147,12 @@ class AuthController extends Controller
             ]
         ]);
     }
+
+    public function test()
+    {
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Test success',
+        ]);
+    }
 }

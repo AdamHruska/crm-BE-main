@@ -31,6 +31,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('refresh', 'refresh');
     Route::post('add-share-id/{id}', 'addShareID');
     Route::post('null-share-id', 'setShareIDtoNull');
+    Route::get('test', 'test');
 });
 Route::controller(contactController::class)->group(function () {
     Route::get('contacts', 'getContacts');
