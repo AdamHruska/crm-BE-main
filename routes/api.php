@@ -7,7 +7,7 @@ use App\Http\Controllers\contactController;
 use App\Http\Controllers\ActivityController;
 use Illuminate\Support\Facades\Auth;
 
-Route::get('/greeting', function () {
+Route::get('greeting', function () {
     return 'Hello World';
 });
 
