@@ -13,37 +13,43 @@ class RouteServiceProvider extends ServiceProvider
     /**
      * The path to your application's "home" route.
      *
-     * Typically, users are redirected here after authentication.
-     *
      * @var string
      */
     public const HOME = '/home';
+
+    /**
+     * The controller namespace for the application.
+     *
+     * @var string|null
+     */
+    protected $namespace = 'App\Http\Controllers';
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.
      */
     public function boot(): void
     {
-        RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
-        });
+        $this->configureRateLimiting();
 
         $this->routes(function () {
             Route::middleware('api')
+                ->namespace($this->namespace)
                 ->prefix('api')
                 ->group(base_path('routes/api.php'));
 
             Route::middleware('web')
+                ->namespace($this->namespace)
                 ->group(base_path('routes/web.php'));
         });
     }
-    protected $namespace = 'App\Http\Controllers';
 
-    // Add this method
-    protected function mapWebRoutes()
+    /**
+     * Configure the rate limiters for the application.
+     */
+    protected function configureRateLimiting(): void
     {
-        Route::middleware('web')
-            ->namespace($this->namespace)
-            ->group(base_path('routes/web.php'));
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
     }
 }
