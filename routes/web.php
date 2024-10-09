@@ -58,9 +58,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::post('/pipik', function() {
-    return "pipik";
-});
+
 
 // Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
 //     $request->fulfill();
