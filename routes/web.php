@@ -43,6 +43,12 @@ Route::controller(ActivityController::class)->group(function () {
     Route::get('get-activities-diary', 'getActivitiesDiary');
     Route::get('activities/{id}', 'getActivityById');
 });
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
