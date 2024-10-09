@@ -10,42 +10,30 @@ use Illuminate\Support\Facades\Route;
 
 class RouteServiceProvider extends ServiceProvider
 {
-    /**
-     * The path to your application's "home" route.
-     *
-     * @var string
-     */
     public const HOME = '/home';
-
-    /**
-     * The controller namespace for the application.
-     *
-     * @var string|null
-     */
+    
     protected $namespace = 'App\Http\Controllers';
 
-    /**
-     * Define your route model bindings, pattern filters, and other route configuration.
-     */
     public function boot(): void
     {
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            Route::middleware('api')
-                ->namespace($this->namespace)
-                ->prefix('api')
-                ->group(base_path('routes/api.php'));
-
+            // Load web routes first
             Route::middleware('web')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/web.php'));
+
+            // Then try to load API routes
+            if (file_exists(base_path('routes/api.php'))) {
+                Route::prefix('api')
+                    ->middleware('api')
+                    ->namespace($this->namespace)
+                    ->group(base_path('routes/api.php'));
+            }
         });
     }
 
-    /**
-     * Configure the rate limiters for the application.
-     */
     protected function configureRateLimiting(): void
     {
         RateLimiter::for('api', function (Request $request) {

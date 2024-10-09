@@ -54,8 +54,13 @@ Route::controller(ActivityController::class)->group(function () {
 |
 */
 
-Route::get('/test-route', function () {
-    return 'This is a test route';
+Route::prefix('api')->group(function () {
+    Route::get('/test', function () {
+        return response()->json(['message' => 'API route test']);
+    });
+    
+    // Add one of your actual API routes here as a test
+    Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
 });
 
 Route::get('/', function () {
