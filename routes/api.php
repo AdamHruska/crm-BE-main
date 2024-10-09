@@ -7,10 +7,9 @@ use App\Http\Controllers\contactController;
 use App\Http\Controllers\ActivityController;
 use Illuminate\Support\Facades\Auth;
 
-Route::get('greeting', function () {
-    return 'Hello World';
+Route::get('/test-route', function () {
+    return 'This is a test route';
 });
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -35,9 +34,7 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('refresh', 'refresh');
     Route::post('add-share-id/{id}', 'addShareID');
     Route::post('null-share-id', 'setShareIDtoNull');
-    // Route::get('test', function() {
-    //     return "test";
-    // });
+   ;
 });
 Route::controller(contactController::class)->group(function () {
     Route::get('contacts', 'getContacts');
