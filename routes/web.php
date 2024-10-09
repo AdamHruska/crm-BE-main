@@ -17,9 +17,9 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('refresh', 'refresh');
     Route::post('add-share-id/{id}', 'addShareID');
     Route::post('null-share-id', 'setShareIDtoNull');
-    Route::get('test', function() {
-        return "test";
-    });
+    // Route::get('test', function() {
+    //     return "test";
+    // });
 });
 
 Route::controller(contactController::class)->group(function () {
@@ -58,7 +58,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-
+Route::prefix('api')->group(function () {
+    // Place one of your API routes here
+    Route::get('/test', function () {
+        return response()->json(['message' => 'API is working']);
+    });
+});
 
 // Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
 //     $request->fulfill();
