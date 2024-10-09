@@ -7,9 +7,7 @@ use App\Http\Controllers\contactController;
 use App\Http\Controllers\ActivityController;
 use Illuminate\Support\Facades\Auth;
 
-Route::get('/test-route', function () {
-    return 'This is a test route';
-});
+
 /*
 |--------------------------------------------------------------------------
 | API Routes

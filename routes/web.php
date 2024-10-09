@@ -54,6 +54,10 @@ Route::controller(ActivityController::class)->group(function () {
 |
 */
 
+Route::get('/test-route', function () {
+    return 'This is a test route';
+});
+
 Route::get('/', function () {
     return view('welcome');
 });
