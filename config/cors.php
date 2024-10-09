@@ -18,7 +18,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['https://partners-crm.sk'],
 
     'allowed_origins_patterns' => [],
 
