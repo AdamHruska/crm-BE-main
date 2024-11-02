@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->integer('tokens')->default(100);
             $table->string('password');
-            $table->integer('share_user_id')->nullable()->default(null);
+            $table->json('share_user_id')->nullable()->default(null);
             $table->rememberToken();
             $table->timestamps();
         });

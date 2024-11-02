@@ -54,6 +54,8 @@ class ActivityController extends Controller
             'online_meeting' => 'nullable|boolean'
         ]);
 
+        $validatedData['created_id'] = auth()->id();
+
         $activity = Activity::create($validatedData);
 
         return response()->json([
@@ -134,6 +136,37 @@ class ActivityController extends Controller
     ]);
 }
 
+public function getActivitiesByUserIds(Request $request)
+{
+    // Extract user_ids from the request
+    $userIds = $request->input('user_ids'); // Expect an array
+
+    // Validate the input
+    $request->validate([
+        'user_ids' => 'required|array',          // Ensure user_ids is an array
+        'user_ids.*' => 'integer|exists:users,id', // Ensure each ID is an integer and exists in the users table
+    ]);
+
+    // Get the IDs of all contacts belonging to the specified users
+    $contactIds = Contact::whereIn('author_id', $userIds)->pluck('id');
+
+    // Retrieve all activities associated with these contact IDs
+    $activities = Activity::whereIn('contact_id', $contactIds)->get();
+
+    // Group activities by user ID
+    $groupedActivities = $activities->groupBy(function ($activity) {
+        $contact = Contact::find($activity->contact_id);
+        return $contact ? $contact->author_id : null; // Return null if contact not found
+    });
+
+    // Return the activities in the response
+    return response()->json([
+        'activities' => $groupedActivities,
+        'message' => 'Activities retrieved successfully',
+        'status' => 200
+    ]);
+}
+
 public function getActivityById($id)
 {
     $activity = Activity::find($id);
@@ -148,6 +181,26 @@ public function getActivityById($id)
     return response()->json([
         'activity' => $activity,
         'message' => 'Activity retrieved successfully',
+        'status' => 200
+    ]);
+}
+
+public function getActivitiesByCreator($creatorId)
+{
+    // Retrieve activities where created_id matches the specified creatorId
+    $activities = Activity::where('created_id', $creatorId)->get();
+
+    // Check if activities exist for the creator
+    if ($activities->isEmpty()) {
+        return response()->json([
+            'message' => 'No activities found for this creator',
+            'status' => 404
+        ], 404);
+    }
+
+    return response()->json([
+        'activities' => $activities,
+        'message' => 'Activities retrieved successfully',
         'status' => 200
     ]);
 }

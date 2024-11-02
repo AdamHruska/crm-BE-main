@@ -16,9 +16,10 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
     Route::post('add-share-id/{id}', 'addShareID');
-    Route::post('null-share-id', 'setShareIDtoNull');
-    Route::get('test', function() {
-        return "test";
+    Route::post('null-share-id/{id}', 'setShareIDfromArray');
+    Route::get('get-user', 'gerUser');
+    Route::get('test', function () {
+        return response()->json(['message' => 'Hello World!']);
     });
 });
 
@@ -41,7 +42,9 @@ Route::controller(ActivityController::class)->group(function () {
     Route::put('update-activities/{id}', 'updateActivity');
     Route::delete('delete-activities/{id}', 'deleteActivity');
     Route::get('get-activities-diary', 'getActivitiesDiary');
+    Route::post('get-activities', 'getActivitiesByUserIds'); //noa funcia na branie sharovanych userov
     Route::get('activities/{id}', 'getActivityById');
+    Route::get(' /{creatorId}', 'getActivitiesByCreator');
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

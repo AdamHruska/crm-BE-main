@@ -11,6 +11,7 @@ class Activity extends Model
 
     protected $fillable = [
         'contact_id',
+        'created_id',
         'aktivita',
         'datumCas',
         'koniec',

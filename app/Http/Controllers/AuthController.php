@@ -100,14 +100,24 @@ class AuthController extends Controller
 
     public function addShareID($id) {
         $user = Auth::user();
-        if($user->share_user_id != null) {
+    
+        // Decode the JSON string into an array, or initialize as an empty array if null
+        $sharedUserIds = json_decode($user->share_user_id, true) ?? [];
+    
+        // Check if the ID already exists in the array
+        if (in_array($id, $sharedUserIds)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Share ID already added',
             ], 406);
-        } else {  
-            $user->share_user_id = $id;
+        } else {
+            // Add the new ID to the array
+            $sharedUserIds[] = $id;
+    
+            // Re-encode the array back to JSON
+            $user->share_user_id = json_encode(array_values($sharedUserIds));
             $user->save();
+    
             return response()->json([
                 'status' => 'success',
                 'message' => 'Share ID added successfully',
@@ -115,14 +125,24 @@ class AuthController extends Controller
             ]);
         }
     }
-
-    public function setShareIDtoNull() {
+    public function setShareIDfromArray($id) {
         $user = Auth::user();
-        $user->share_user_id = null;
+        
+        // Decode the JSON string into an array, or use an empty array if null
+        $sharedUserIds = json_decode($user->share_user_id, true) ?? [];
+    
+        // Remove the specific ID from the array
+        $sharedUserIds = array_filter($sharedUserIds, fn($shareId) => $shareId != $id);
+        
+        // Re-index the array
+        $user->share_user_id = json_encode(array_values($sharedUserIds)); 
+    
+        // Save the user model
         $user->save();
+    
         return response()->json([
             'status' => 'success',
-            'message' => 'Share ID set to null',
+            'message' => 'Share ID(s) removed successfully',
             'user' => $user,
         ]);
     }
@@ -148,11 +168,11 @@ class AuthController extends Controller
         ]);
     }
 
-    public function test()
+    public function gerUser()
     {
         return response()->json([
             'status' => 'success',
-            'message' => 'Test success',
+            'user' => Auth::user(),
         ]);
     }
 }

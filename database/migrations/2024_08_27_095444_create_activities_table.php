@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('activities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('contact_id')->constrained('contacts')->onDelete('cascade');
+            $table->foreignId('created_id')->constrained('users')->onDelete('set null');
             $table->string('aktivita');
             $table->timestamp('datumCas')->nullable();
             $table->timestamp('koniec')->nullable();
