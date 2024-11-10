@@ -30,7 +30,7 @@ class AuthController extends Controller
         if (!$token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Unauthorized',
+                'message' => 'Zlé meno alebo heslo',
             ], 401);
         }
         $user = Auth::user();
@@ -82,7 +82,7 @@ class AuthController extends Controller
         if (!$token) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Unauthorized',
+                'message' => 'Zlé meno alebo heslo',
             ], 401);
         }
         #event(new Registered($user));

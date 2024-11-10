@@ -44,7 +44,7 @@ Route::controller(ActivityController::class)->group(function () {
     Route::get('get-activities-diary', 'getActivitiesDiary');
     Route::post('get-activities', 'getActivitiesByUserIds'); //noa funcia na branie sharovanych userov
     Route::get('activities/{id}', 'getActivityById');
-    Route::get(' /{creatorId}', 'getActivitiesByCreator');
+    Route::get('get-activities-by-creator/{creatorId}', 'getActivitiesByCreator');
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

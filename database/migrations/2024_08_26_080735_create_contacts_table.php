@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('cislo')->nullable()->default(null); // Phone number
             $table->string('email')->unique()->nullable()->default(null);   // Contact's email address
             $table->string('odporucitel'); // Referrer
-            $table->string('adresa'); // Address
-            $table->year('rok_narodenia'); // age
+            $table->string('adresa')->nullable()->default(null); // Address
+            $table->year('rok_narodenia')->nullable()->default(null); // age
             $table->string('zamestanie')->nullable()->default(null); // Occupation or employment status
             $table->text('poznamka')->nullable()->default(null); // Additional notes
             $table->date('Investicny_dotaznik')->nullable()->default(null); // Investment questionnaire date

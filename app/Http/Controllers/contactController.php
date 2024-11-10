@@ -17,7 +17,7 @@ class contactController extends Controller
     {
         $user = auth()->user();
 
-        $contacts = Contact::where('author_id', $user->id)->paginate(10);
+        $contacts = Contact::where('author_id', $user->id)->paginate(20);
 
         return response()->json([
         'contacts' => $contacts,
@@ -76,9 +76,9 @@ class contactController extends Controller
             'cislo' => 'nullable|string|max:255',
             'email' => 'nullable|email|unique:contacts,email',
             'odporucitel' => 'required|string|max:255',
-            'adresa' => 'required|string|max:255',
-            'vek' => 'required|integer|min:1|max:150', // Ensure valid age input
-            'zamestanie' => 'required|string|max:255',
+            'adresa' => 'nullable|string|max:255',
+            'vek' => 'nullable|integer|min:1|max:150', // Ensure valid age input
+            'zamestanie' => 'nullable|string|max:255',
             'poznamka' => 'nullable|string',
             'Investicny_dotaznik' => 'nullable|date'
         ]);
@@ -160,9 +160,9 @@ class contactController extends Controller
             'cislo' => 'nullable|string|max:255',
             'email' => 'nullable|email',
             'odporucitel' => 'required|string|max:255',
-            'adresa' => 'required|string|max:255',
-            'vek' => 'required|integer|min:1|max:150', // Validate age input
-            'zamestanie' => 'required|string|max:255',
+            'adresa' => 'nullable|string|max:255',
+            'vek' => 'nullable|integer|min:1|max:150', // Validate age input
+            'zamestanie' => 'nullable|string|max:255',
             'poznamka' => 'nullable|string',
             'Investicny_dotaznik' => 'nullable|date',
             'author_id' => 'required|integer'

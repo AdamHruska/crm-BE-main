@@ -14,18 +14,17 @@ return new class extends Migration
         Schema::create('activities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('contact_id')->constrained('contacts')->onDelete('cascade');
-            $table->foreignId('created_id')->constrained('users')->onDelete('set null');
+            $table->foreignId('created_id')->nullable()->constrained('users')->onDelete('set null'); // Ensure nullable() is added
             $table->string('aktivita');
             $table->timestamp('datumCas')->nullable();
             $table->timestamp('koniec')->nullable();
             $table->text('poznamka')->nullable();
-            // Removed `aktivitaZadana`
             $table->integer('volane')->nullable()->default(null);
             $table->integer('dovolane')->nullable()->default(null);
             $table->integer('dohodnute')->nullable()->default(null);
             $table->string('miesto_stretnutia')->nullable()->default(null);
             $table->boolean('online_meeting')->default(false);
-            $table->timestamps(); // This includes `created_at` and `updated_at`
+            $table->timestamps();
         });
     }
 
