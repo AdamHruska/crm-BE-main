@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\contactController;
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\CallListController;
 
 
 Route::controller(AuthController::class)->group(function () {
@@ -33,6 +34,7 @@ Route::controller(contactController::class)->group(function () {
     Route::get('get-users', 'getUsers');   
     Route::get('search-contacts', 'searchContacts'); 
     Route::patch('contact/{id}/email', 'updateEmail');
+    Route::post('call-list', 'getContactsByIds');
 });
 
 Route::controller(ActivityController::class)->group(function () {
@@ -45,6 +47,24 @@ Route::controller(ActivityController::class)->group(function () {
     Route::post('get-activities', 'getActivitiesByUserIds'); //noa funcia na branie sharovanych userov
     Route::get('activities/{id}', 'getActivityById');
     Route::get('get-activities-by-creator/{creatorId}', 'getActivitiesByCreator');
+});
+
+Route::controller(CallListController::class)->group(function () {
+      // Fetch all call lists (index)
+      Route::get('call-lists', 'index');
+    
+      // Create a new call list (store)
+      Route::post('call-lists', 'store');
+      
+      // Fetch a specific call list (show)
+      Route::get('call-lists/{id}', 'show');
+      
+      // Update a specific call list (update)
+      Route::put('call-lists/{id}', 'update');
+      
+      // Delete a specific call list (destroy)
+      Route::delete('call-lists/{id}', 'destroy');
+  
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

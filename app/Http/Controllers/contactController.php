@@ -16,54 +16,56 @@ class contactController extends Controller
     public function getContacts()
     {
         $user = auth()->user();
-
-        $contacts = Contact::where('author_id', $user->id)->paginate(20);
-
+    
+        // Retrieve contacts ordered by newest first and paginate
+        $contacts = Contact::where('author_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+    
         return response()->json([
-        'contacts' => $contacts,
-        'message' => 'Contacts retrieved successfully',
-        'status' => 200
+            'contacts' => $contacts,
+            'message' => 'Contacts retrieved successfully',
+            'status' => 200
         ]);
     }
 
     public function getAllContacts()
     {
         $user = auth()->user();
-
-        $contacts = Contact::where('author_id', $user->id)->get();
-
+    
+        // Retrieve contacts ordered by newest first
+        $contacts = Contact::where('author_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    
         return response()->json([
-        'contacts' => $contacts,
-        'message' => 'Contacts retrieved successfully',
-        'status' => 200
+            'contacts' => $contacts,
+            'message' => 'Contacts retrieved successfully',
+            'status' => 200
         ]);
     }
 
-    // public function addContact(Request $request)
-    // {
-    //     $user = auth()->user();
+    public function getUsers()
+    {
+        $user = auth()->user();
+        $userId = $user->id;
+        
+        $users = User::where('id', '!=', $userId)->get();
 
-    //     $contact = new Contact();
-    //     $contact->meno = $request->meno;
-    //     $contact->priezvisko = $request->priezvisko;
-    //     $contact->poradca = $user->id;
-    //     $contact->cislo = $request->cislo;
-    //     $contact->email = $request->email;
-    //     $contact->odporucitel = $request->odporucitel;
-    //     $contact->adresa = $request->adresa;
-    //     $contact->vek = $request->vek;
-    //     $contact->zamestanie = $request->zamestanie;
-    //     $contact->poznamka = $request->poznamka;
-    //     $contact->Investicny_dotaznik = $request->Investicny_dotaznik;
-    //     $contact->author_id = $user->id;
-    //     $contact->save();
+        return response()->json([
+            'users' => $users,
+            'message' => 'Users retrieved successfully',
+            'status' => 200
+        ]);
 
-    //     return response()->json([
-    //         'contact' => $contact,
-    //         'message' => 'Contact added successfully',
-    //         'status' => 201
-    //     ]);
-    // }
+        // Return all users (or you can filter it by some role or criteria)
+        // $users = User::select('id', 'first_name', 'last_name')->get();
+
+        // return response()->json([
+        //     'users' => $users,
+            
+        // ]);
+    }
 
     public function addContact(Request $request)
     {
@@ -77,7 +79,7 @@ class contactController extends Controller
             'email' => 'nullable|email|unique:contacts,email',
             'odporucitel' => 'required|string|max:255',
             'adresa' => 'nullable|string|max:255',
-            'vek' => 'nullable|integer|min:1|max:150', // Ensure valid age input
+            'vek' => 'nullable|integer|min:0|max:150', // Ensure valid age input
             'zamestanie' => 'nullable|string|max:255',
             'poznamka' => 'nullable|string',
             'Investicny_dotaznik' => 'nullable|date'
@@ -154,18 +156,18 @@ class contactController extends Controller
     {
         // Validate the incoming request
         $validated = $request->validate([
-            'meno' => 'required|string|max:255',
-            'priezvisko' => 'required|string|max:255',
-            'poradca' => 'required|string|max:255',
+            'meno' => 'nullable|string|max:255',
+            'priezvisko' => 'nullable|string|max:255',
+            'poradca' => 'nullable|string|max:255',
             'cislo' => 'nullable|string|max:255',
             'email' => 'nullable|email',
-            'odporucitel' => 'required|string|max:255',
+            'odporucitel' => 'nullable|string|max:255',
             'adresa' => 'nullable|string|max:255',
-            'vek' => 'nullable|integer|min:1|max:150', // Validate age input
+            'vek' => 'nullable|integer|min:0|max:150', // Validate age input
             'zamestanie' => 'nullable|string|max:255',
             'poznamka' => 'nullable|string',
             'Investicny_dotaznik' => 'nullable|date',
-            'author_id' => 'required|integer'
+            'author_id' => 'nullable|integer'
         ]);
     
         // Find the contact to update
@@ -227,59 +229,46 @@ class contactController extends Controller
     // }
 
     public function searchContacts(Request $request)
-{
-    $query = $request->input('query');
-
-    // Split the query by spaces into an array
-    $names = explode(' ', $query);
-
-    if (count($names) == 2) {
-        // Search for both 'first_name last_name' and 'last_name first_name'
-        $contacts = Contact::where(function($q) use ($names) {
-                $q->where('meno', 'like', "%{$names[0]}%")
-                  ->where('priezvisko', 'like', "%{$names[1]}%");
-            })
-            ->orWhere(function($q) use ($names) {
-                $q->where('meno', 'like', "%{$names[1]}%")
-                  ->where('priezvisko', 'like', "%{$names[0]}%");
-            })
-            ->get();
-    } else {
-        // If there aren't exactly two words, just search normally for partial matches
-        $contacts = Contact::where('meno', 'like', "%{$query}%")
-                            ->orWhere('priezvisko', 'like', "%{$query}%")
-                            ->get();
-    }
-
-    return response()->json([
-        'contacts' => $contacts,
-        'message' => 'Contacts retrieved successfully',
-        'status' => 200
-    ]);
-}
-
-    public function getUsers()
     {
-        $user = auth()->user();
-        $userId = $user->id;
+        $query = $request->input('query');
+        $loggedInUserId = auth()->id(); // Get the ID of the logged-in user
         
-        $users = User::where('id', '!=', $userId)->get();
-
+        // Split the query by spaces into an array
+        $names = explode(' ', $query);
+        
+        if (count($names) == 2) {
+            // Search for 'first_name last_name', 'last_name first_name', or matches in 'odporucitel'
+            $contacts = Contact::where('poradca', $loggedInUserId) // Ensure 'poradca' matches the logged-in user
+                ->where(function ($q) use ($names) {
+                    $q->where(function ($subQuery) use ($names) {
+                            $subQuery->where('meno', 'like', "%{$names[0]}%")
+                                     ->where('priezvisko', 'like', "%{$names[1]}%");
+                        })
+                      ->orWhere(function ($subQuery) use ($names) {
+                            $subQuery->where('meno', 'like', "%{$names[1]}%")
+                                     ->where('priezvisko', 'like', "%{$names[0]}%");
+                        });
+                })
+                ->orWhere('odporucitel', 'like', "%{$query}%")
+                ->get();
+        } else {
+            // If there aren't exactly two words, search for partial matches in 'meno', 'priezvisko', or 'odporucitel'
+            $contacts = Contact::where('poradca', $loggedInUserId) // Ensure 'poradca' matches the logged-in user
+                ->where(function ($q) use ($query) {
+                    $q->where('meno', 'like', "%{$query}%")
+                      ->orWhere('priezvisko', 'like', "%{$query}%")
+                      ->orWhere('odporucitel', 'like', "%{$query}%");
+                })
+                ->get();
+        }
+        
         return response()->json([
-            'users' => $users,
-            'message' => 'Users retrieved successfully',
+            'contacts' => $contacts,
+            'message' => 'Contacts retrieved successfully',
             'status' => 200
         ]);
-
-        // Return all users (or you can filter it by some role or criteria)
-        // $users = User::select('id', 'first_name', 'last_name')->get();
-
-        // return response()->json([
-        //     'users' => $users,
-            
-        // ]);
     }
-
+    
     public function updateEmail(Request $request, $id)
     {
         // Validate the email
@@ -308,5 +297,44 @@ class contactController extends Controller
             'message' => 'Email updated successfully',
             'status' => 200
         ]);
+    }
+
+    public function getContactsByIds(Request $request)
+    {
+        try {
+            // Validate the request
+            $validated = $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'integer'
+            ]);
+    
+            // Get the authenticated user
+            $user = auth()->user();
+    
+            // Retrieve contacts by the provided IDs
+            // Only get contacts that belong to the authenticated user
+            $contacts = Contact::whereIn('id', $validated['ids'])
+                             ->where('author_id', $user->id)
+                             ->get();
+    
+            return response()->json([
+                'contacts' => $contacts,
+                'message' => 'Contacts retrieved successfully',
+                'status' => 200
+            ]);
+    
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+                'status' => 422
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred',
+                'error' => $e->getMessage(),
+                'status' => 500
+            ], 500);
+        }
     }
 }
