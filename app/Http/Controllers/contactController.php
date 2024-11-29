@@ -207,9 +207,115 @@ class contactController extends Controller
             'status' => 200
         ]);
     }
-    
-    
 
+    public function addContacts(Request $request)
+{
+    \Log::channel('daily')->emergency('Full Request Data', [
+        'all_input' => $request->all(),
+        'user_id' => auth()->id(),
+        'timestamp' => now()->toDateTimeString()
+    ]);
+
+    try {
+        // Capture any PHP errors
+        set_error_handler(function($severity, $message, $file, $line) {
+            throw new \ErrorException($message, 0, $severity, $file, $line);
+        });
+
+        $user = auth()->user();
+        if (!$user) {
+            throw new \Exception('No authenticated user found');
+        }
+
+        // Extremely permissive validation
+        $validatedContacts = $request->validate([
+            'contacts' => 'required|array|max:10',
+            'contacts.*' => 'required|array'
+        ]);
+
+        $currentYear = now()->year;
+        $createdContacts = [];
+
+        DB::beginTransaction();
+
+        foreach ($validatedContacts['contacts'] as $index => $contactData) {
+            // Extremely verbose logging
+            \Log::channel('daily')->emergency("Processing Contact #{$index}", [
+                'contact_data' => $contactData,
+                'contact_keys' => array_keys($contactData)
+            ]);
+
+            // Ensure all required fields exist with null coalescing
+            $contact = new Contact();
+            $contact->meno = $contactData['meno'] ?? null;
+            $contact->priezvisko = $contactData['priezvisko'] ?? null;
+            $contact->poradca = $user->id;
+            $contact->cislo = $contactData['cislo'] ?? null;
+            $contact->email = $contactData['email'] ?? null;
+            $contact->odporucitel = $contactData['odporucitel'] ?? null;
+            $contact->adresa = $contactData['adresa'] ?? null;
+            
+            // Careful age handling
+            $contact->rok_narodenia = null;
+            if (!empty($contactData['vek']) && is_numeric($contactData['vek'])) {
+                $contact->rok_narodenia = $currentYear - (int)$contactData['vek'];
+            }
+
+            $contact->zamestanie = $contactData['zamestanie'] ?? null;
+            $contact->poznamka = $contactData['poznamka'] ?? null;
+            $contact->author_id = $user->id;
+
+            // Detailed validation before save
+            if (!$contact->meno || !$contact->priezvisko || !$contact->odporucitel) {
+                \Log::channel('daily')->emergency("Skipping invalid contact", [
+                    'contact' => $contact->toArray(),
+                    'reason' => 'Missing required fields'
+                ]);
+                continue;
+            }
+
+            try {
+                $contact->save();
+                $createdContacts[] = $contact;
+            } catch (\Exception $saveError) {
+                \Log::channel('daily')->emergency('Save Contact Error', [
+                    'error' => $saveError->getMessage(),
+                    'contact_data' => $contactData,
+                    'trace' => $saveError->getTraceAsString()
+                ]);
+                throw $saveError;
+            }
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'contacts' => $createdContacts,
+            'message' => 'Contacts added successfully',
+            'status' => 201
+        ]);
+    } catch (\Throwable $e) {
+        // Catch all possible exceptions
+        DB::rollBack();
+
+        \Log::channel('daily')->emergency('Catastrophic Error in addContacts', [
+            'error_message' => $e->getMessage(),
+            'error_type' => get_class($e),
+            'full_trace' => $e->getTraceAsString(),
+            'request_data' => $request->all()
+        ]);
+
+        return response()->json([
+            'message' => 'Catastrophic Error: ' . $e->getMessage(),
+            'error_type' => get_class($e),
+            'status' => 500
+        ], 500);
+    } finally {
+        // Restore error handler
+        restore_error_handler();
+    }
+}
+    
 
     // Search for contacts
     // public function searchContacts(Request $request)

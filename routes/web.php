@@ -35,6 +35,7 @@ Route::controller(contactController::class)->group(function () {
     Route::get('search-contacts', 'searchContacts'); 
     Route::patch('contact/{id}/email', 'updateEmail');
     Route::post('call-list', 'getContactsByIds');
+    Route::post('post-create-contacts', 'addContacts');
 });
 
 Route::controller(ActivityController::class)->group(function () {
