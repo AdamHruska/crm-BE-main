@@ -336,43 +336,85 @@ class contactController extends Controller
 
     public function searchContacts(Request $request)
     {
+        // $query = $request->input('query');
+        // $loggedInUserId = auth()->id(); // Get the ID of the logged-in user
+        
+        // // Split the query by spaces into an array
+        // $names = explode(' ', $query);
+        
+        // if (count($names) == 2) {
+        //     // Search for 'first_name last_name', 'last_name first_name', or matches in 'odporucitel'
+        //     $contacts = Contact::where('poradca', $loggedInUserId) // Ensure 'poradca' matches the logged-in user
+        //         ->where(function ($q) use ($names) {
+        //             $q->where(function ($subQuery) use ($names) {
+        //                     $subQuery->where('meno', 'like', "%{$names[0]}%")
+        //                              ->where('priezvisko', 'like', "%{$names[1]}%");
+        //                 })
+        //               ->orWhere(function ($subQuery) use ($names) {
+        //                     $subQuery->where('meno', 'like', "%{$names[1]}%")
+        //                              ->where('priezvisko', 'like', "%{$names[0]}%");
+        //                 });
+        //         })
+        //         ->orWhere('odporucitel', 'like', "%{$query}%")
+        //         ->get();
+        // } else {
+        //     // If there aren't exactly two words, search for partial matches in 'meno', 'priezvisko', or 'odporucitel'
+        //     $contacts = Contact::where('poradca', $loggedInUserId) // Ensure 'poradca' matches the logged-in user
+        //         ->where(function ($q) use ($query) {
+        //             $q->where('meno', 'like', "%{$query}%")
+        //               ->orWhere('priezvisko', 'like', "%{$query}%")
+        //               ->orWhere('odporucitel', 'like', "%{$query}%");
+        //         })
+        //         ->get();
+        // }
+        
+        // return response()->json([
+        //     'contacts' => $contacts,
+        //     'message' => 'Contacts retrieved successfully',
+        //     'status' => 200
+        // ]);
+
         $query = $request->input('query');
-        $loggedInUserId = auth()->id(); // Get the ID of the logged-in user
-        
-        // Split the query by spaces into an array
-        $names = explode(' ', $query);
-        
-        if (count($names) == 2) {
-            // Search for 'first_name last_name', 'last_name first_name', or matches in 'odporucitel'
-            $contacts = Contact::where('poradca', $loggedInUserId) // Ensure 'poradca' matches the logged-in user
-                ->where(function ($q) use ($names) {
-                    $q->where(function ($subQuery) use ($names) {
-                            $subQuery->where('meno', 'like', "%{$names[0]}%")
-                                     ->where('priezvisko', 'like', "%{$names[1]}%");
-                        })
-                      ->orWhere(function ($subQuery) use ($names) {
-                            $subQuery->where('meno', 'like', "%{$names[1]}%")
-                                     ->where('priezvisko', 'like', "%{$names[0]}%");
-                        });
-                })
-                ->orWhere('odporucitel', 'like', "%{$query}%")
-                ->get();
-        } else {
-            // If there aren't exactly two words, search for partial matches in 'meno', 'priezvisko', or 'odporucitel'
-            $contacts = Contact::where('poradca', $loggedInUserId) // Ensure 'poradca' matches the logged-in user
-                ->where(function ($q) use ($query) {
-                    $q->where('meno', 'like', "%{$query}%")
-                      ->orWhere('priezvisko', 'like', "%{$query}%")
-                      ->orWhere('odporucitel', 'like', "%{$query}%");
-                })
-                ->get();
-        }
-        
-        return response()->json([
-            'contacts' => $contacts,
-            'message' => 'Contacts retrieved successfully',
-            'status' => 200
-        ]);
+    $loggedInUserId = auth()->id(); // Get the ID of the logged-in user
+    
+    // Split the query by spaces into an array
+    $names = explode(' ', $query);
+    
+    if (count($names) == 2) {
+        // Search for 'first_name last_name', 'last_name first_name', or matches in 'odporucitel'
+        $contacts = Contact::where('poradca', $loggedInUserId) // Ensure 'poradca' matches the logged-in user
+            ->where(function ($q) use ($names) {
+                $q->where(function ($subQuery) use ($names) {
+                        $subQuery->where('meno', 'like', "%{$names[0]}%")
+                                 ->where('priezvisko', 'like', "%{$names[1]}%");
+                    })
+                  ->orWhere(function ($subQuery) use ($names) {
+                        $subQuery->where('meno', 'like', "%{$names[1]}%")
+                                 ->where('priezvisko', 'like', "%{$names[0]}%");
+                    });
+            })
+            ->orWhere('odporucitel', 'like', "%{$query}%")
+            ->orWhere('cislo', 'like', "%{$query}%")  // Added search for 'cislo'
+            ->orWhere('email', 'like', "%{$query}%")  // Added search for 'email'
+            ->get();
+    } else {
+        // If there aren't exactly two words, search for partial matches in 'meno', 'priezvisko', or 'odporucitel'
+        $contacts = Contact::where('poradca', $loggedInUserId) // Ensure 'poradca' matches the logged-in user
+            ->where(function ($q) use ($query) {
+                $q->where('meno', 'like', "%{$query}%")
+                  ->orWhere('priezvisko', 'like', "%{$query}%")
+                  ->orWhere('odporucitel', 'like', "%{$query}%")
+                  ->orWhere('cislo', 'like', "%{$query}%")  // Added search for 'cislo'
+                  ->orWhere('email', 'like', "%{$query}%");  // Added search for 'email'
+            })
+            ->get();
+    }
+    
+    return response()->json([
+        'contacts' => $contacts,
+        'message' => 'Contacts retrieved successfully',
+        'status' => 200
+    ]);
     }
     
     public function updateEmail(Request $request, $id)
