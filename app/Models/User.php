@@ -4,12 +4,10 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
-
 
 class User extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
@@ -28,6 +26,7 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'tokens',
         'password',
         'share_user_id',
+        'confirmed_share_user_id', // Added here
     ];
 
     /**
@@ -46,8 +45,9 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
      * @var array<string, string>
      */
     protected $casts = [
-        
         'password' => 'hashed',
+        'share_user_id' => 'array', // Cast JSON column to array
+        'confirmed_share_user_id' => 'array', // Cast JSON column to array
     ];
 
     /**
@@ -69,12 +69,6 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
     {
         return [
             'username' => $this->username,
-            // Add any other custom claims you want to include here.
-            // For example, 'role' => $this->role,
         ];
     }
-    // public function userBadge(): HasOne
-    // {
-    //     return $this->hasOne(Badge::class, 'badge_id', 'badge_id');
-    // }
 }

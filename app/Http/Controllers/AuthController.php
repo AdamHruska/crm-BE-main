@@ -147,6 +147,25 @@ class AuthController extends Controller
         ]);
     }
 
+//     public function confirmShareRequest(Request $request)
+// {
+//     $user = auth()->user();
+//     $shareId = $request->input('share_id'); // ID to be confirmed
+
+//     if (!$shareId || !in_array($shareId, $user->share_user_id)) {
+//         return response()->json(['error' => 'Invalid share ID'], 400);
+//     }
+
+//     $confirmedShareIds = $user->confirmed_share_ids ?? [];
+//     if (!in_array($shareId, $confirmedShareIds)) {
+//         $confirmedShareIds[] = $shareId;
+//         $user->confirmed_share_ids = $confirmedShareIds;
+//         $user->save();
+//     }
+
+//     return response()->json(['message' => 'Share request confirmed']);
+// }
+
     public function logout()
     {
         Auth::logout();

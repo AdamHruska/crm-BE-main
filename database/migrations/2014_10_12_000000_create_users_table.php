@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('tokens')->default(100);
             $table->string('password');
             $table->json('share_user_id')->nullable()->default('[]');
+            $table->json('confirmed_share_user_id')->nullable()->default('[]'); // New column
             $table->rememberToken();
             $table->timestamps();
         });

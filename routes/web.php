@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\contactController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\CallListController;
+use App\Http\Controllers\CalendarSharingRequestController;
 
 
 Route::controller(AuthController::class)->group(function () {
@@ -66,6 +67,23 @@ Route::controller(CallListController::class)->group(function () {
       // Delete a specific call list (destroy)
       Route::delete('call-lists/{id}', 'destroy');
   
+});
+
+Route::controller(CalendarSharingRequestController::class)->group(function () {
+     // Fetch all calendar sharing requests (index)
+     Route::get('calendar-sharing-requests', 'index');
+    
+     // Fetch a specific calendar sharing request (show)
+     Route::get('calendar-sharing-requests/{id}', 'show');
+     
+     // Create a new calendar sharing request (store)
+     Route::post('calendar-sharing-requests', 'store');
+     
+     // Update a specific calendar sharing request (update)
+     Route::put('calendar-sharing-requests/{id}', 'update');
+     
+     // Delete a specific calendar sharing request (destroy)
+     Route::delete('calendar-sharing-requests/{id}', 'destroy');
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
