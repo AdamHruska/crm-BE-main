@@ -334,6 +334,12 @@ class contactController extends Controller
     //     ]);
     // }
 
+    public function getHelloWorld() {
+        return response()->json([
+            'message' => 'Hello World!',
+        ]);
+    }
+
     public function searchContacts(Request $request)
     {
         // $query = $request->input('query');

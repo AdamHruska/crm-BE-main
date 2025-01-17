@@ -125,6 +125,7 @@ class AuthController extends Controller
             ]);
         }
     }
+    
     public function setShareIDfromArray($id) {
         $user = Auth::user();
         
@@ -146,6 +147,55 @@ class AuthController extends Controller
             'user' => $user,
         ]);
     }
+
+    // public function setShareIDfromArray($id) {
+    //     try {
+    //         $user = Auth::user();
+            
+    //         // Add logging to debug
+    //         \Log::info('Current share_user_id:', ['data' => $user->share_user_id]);
+            
+    //         // Decode the JSON string into an array, or use an empty array if null
+    //         $sharedUserIds = json_decode($user->share_user_id, true);
+            
+    //         if ($sharedUserIds === null) {
+    //             $sharedUserIds = [];
+    //         }
+            
+    //         // Remove the specific ID from the array
+    //         $sharedUserIds = array_filter($sharedUserIds, function($shareId) use ($id) {
+    //             return $shareId != $id;
+    //         });
+            
+    //         // Re-index the array
+    //         $sharedUserIds = array_values($sharedUserIds);
+            
+    //         // Convert back to JSON
+    //         $user->share_user_id = json_encode($sharedUserIds);
+            
+    //         // Save the user model
+    //         $user->save();
+            
+    //         return response()->json([
+    //             'status' => 'success',
+    //             'message' => 'Share ID(s) removed successfully',
+    //             'user' => $user,
+    //             'removed_id' => $id
+    //         ]);
+            
+    //     } catch (\Exception $e) {
+    //         \Log::error('Error in setShareIDfromArray:', [
+    //             'error' => $e->getMessage(),
+    //             'trace' => $e->getTraceAsString()
+    //         ]);
+            
+    //         return response()->json([
+    //             'status' => 'error',
+    //             'message' => 'An error occurred while processing your request',
+    //             'debug_message' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
 //     public function confirmShareRequest(Request $request)
 // {

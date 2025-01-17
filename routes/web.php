@@ -17,12 +17,10 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/register', 'register');
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
-    Route::post('add-share-id/{id}', 'addShareID');
-    Route::post('null-share-id/{id}', 'setShareIDfromArray');
+    //Route::post('add-share-id/{id}', 'addShareID');
+    //Route::post('null-share-id/{id}', 'setShareIDfromArray');
     Route::get('get-user', 'gerUser');
-    Route::get('test', function () {
-        return response()->json(['message' => 'Hello World!']);
-    });
+    Route::get('get-hello', 'getHelloWorld');
 });
 
 Route::controller(contactController::class)->group(function () {
@@ -37,6 +35,7 @@ Route::controller(contactController::class)->group(function () {
     Route::patch('contact/{id}/email', 'updateEmail');
     Route::post('call-list', 'getContactsByIds');
     Route::post('post-create-contacts', 'addContacts');
+    Route::get('get', 'getHelloWorld');
 });
 
 Route::controller(ActivityController::class)->group(function () {
@@ -49,6 +48,8 @@ Route::controller(ActivityController::class)->group(function () {
     Route::post('get-activities', 'getActivitiesByUserIds'); //noa funcia na branie sharovanych userov
     Route::get('activities/{id}', 'getActivityById');
     Route::get('get-activities-by-creator/{creatorId}', 'getActivitiesByCreator');
+    Route::post('add-share-id/{id}', 'addShareID');
+    Route::post('null-share-id/{id}', 'setShareIDfromArray');
 });
 
 Route::controller(CallListController::class)->group(function () {
@@ -70,21 +71,35 @@ Route::controller(CallListController::class)->group(function () {
 });
 
 Route::controller(CalendarSharingRequestController::class)->group(function () {
-     // Fetch all calendar sharing requests (index)
-     Route::get('calendar-sharing-requests', 'index');
-    
-     // Fetch a specific calendar sharing request (show)
-     Route::get('calendar-sharing-requests/{id}', 'show');
-     
-     // Create a new calendar sharing request (store)
-     Route::post('calendar-sharing-requests', 'store');
-     
-     // Update a specific calendar sharing request (update)
-     Route::put('calendar-sharing-requests/{id}', 'update');
-     
-     // Delete a specific calendar sharing request (destroy)
-     Route::delete('calendar-sharing-requests/{id}', 'destroy');
+    Route::get('get-their-requests', 'viewTheirCalendarRequests');
+    Route::get('get-mine-requests', 'letThemViewMineCalendarRequests');
+    Route::delete('delete-sharing-requests/{id}', 'destroy');
+    Route::post('add-sharing-id/{userId}', 'addShareIDById');
+    Route::post('post-sharing-request', 'store');
 });
+
+// Route::controller(CalendarSharingRequestController::class)->group(function () {
+//      // Fetch all calendar sharing requests (index)
+//      Route::get('calendar-sharing-requests', 'index');
+    
+//      // Fetch a specific calendar sharing request (show)
+//      Route::get('calendar-sharing-requests/{id}', 'show');
+     
+//      // Create a new calendar sharing request (store)
+//      Route::post('calendar-sharing-requests', 'store');
+     
+//      // Update a specific calendar sharing request (update)
+//      Route::put('calendar-sharing-requests/{id}', 'update');
+     
+//      // Delete a specific calendar sharing request (destroy)
+//      Route::delete('delete-sharing-request/{id}', 'destroy');
+     
+//      // show viewTheirCalendarRequests
+//      Route::get('get-their-requests', 'viewTheirCalendarRequests');
+
+//      // show letThemViewMineCalendarRequests
+//      Route::get('get-mine-requests', 'letThemViewMineCalendarRequests');
+// });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
