@@ -73,9 +73,19 @@ Route::controller(CallListController::class)->group(function () {
 Route::controller(CalendarSharingRequestController::class)->group(function () {
     Route::get('get-their-requests', 'viewTheirCalendarRequests');
     Route::get('get-mine-requests', 'letThemViewMineCalendarRequests');
+    Route::get('get-mine-requests-approval', 'letThemViewMineCalendarRequestsForApproval');
     Route::delete('delete-sharing-requests/{id}', 'destroy');
-    Route::post('add-sharing-id/{userId}', 'addShareIDById');
+    Route::post('add-sharing-id/{userId}/{requestId}', 'addShareIDById');
     Route::post('post-sharing-request', 'store');
+    Route::get('get-requests-history', 'returnHistory');
+    
+    Route::get('get-mine-requests-skuska', 'letThemViewMineCalendarRequestsSkuska');
+    
+    Route::get('get-mine-requests-tabulka', 'letThemViewMineCalendarRequestsTabulka');
+    
+    Route::post('add-sharing-id-table/{id}/{requestId}', 'addShareIDByIdTable');
+    
+    Route::get('who-see-my-cal', 'whoSeesMyCalendar');
 });
 
 // Route::controller(CalendarSharingRequestController::class)->group(function () {
