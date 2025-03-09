@@ -26,7 +26,10 @@ class User extends Authenticatable implements JWTSubject, MustVerifyEmail
         'tokens',
         'password',
         'share_user_id',
-        'confirmed_share_user_id', // Added here
+        'confirmed_share_user_id',
+        'microsoft_access_token', // New column
+        'microsoft_refresh_token', // New column
+        'microsoft_token_expires_at' // Added here
     ];
 
     /**

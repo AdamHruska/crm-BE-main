@@ -10,7 +10,17 @@ use App\Http\Controllers\contactController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\CallListController;
 use App\Http\Controllers\CalendarSharingRequestController;
+use App\Http\Controllers\statisticsController;
+use App\Http\Controllers\MicrosoftCalendarController;
 
+
+Route::get('/auth/callbackAzure', [MicrosoftCalendarController::class, 'callbackAzure']);
+Route::get('/get-events', [MicrosoftCalendarController::class, 'getEvents']);
+Route::post('/logout', [MicrosoftCalendarController::class, 'logout']);
+Route::post('/create-microsoft-event', [MicrosoftCalendarController::class, 'createEvent']);
+Route::delete('events/{eventId}', [MicrosoftCalendarController::class, 'deleteEvent']);
+Route::post('/create-teams-meeting', [MicrosoftCalendarController::class, 'createTeamsMeeting']);
+Route::get('/check-auth', [MicrosoftCalendarController::class, 'checkAuth']);
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('/login', 'login');
@@ -88,6 +98,9 @@ Route::controller(CalendarSharingRequestController::class)->group(function () {
     Route::get('who-see-my-cal', 'whoSeesMyCalendar');
 });
 
+Route::controller(statisticsController::class)->group(function () {
+    Route::post('activity-statistics', 'getStatistics');
+});
 // Route::controller(CalendarSharingRequestController::class)->group(function () {
 //      // Fetch all calendar sharing requests (index)
 //      Route::get('calendar-sharing-requests', 'index');

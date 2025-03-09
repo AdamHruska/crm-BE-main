@@ -21,6 +21,11 @@ return new class extends Migration
             $table->string('password');
             $table->json('share_user_id')->nullable()->default('[]');
             $table->json('confirmed_share_user_id')->nullable()->default('[]'); // New column
+
+            // $table->text('microsoft_access_token')->nullable();
+            // $table->text('microsoft_refresh_token')->nullable();
+            // $table->timestamp('microsoft_token_expires_at')->nullable();
+
             $table->rememberToken();
             $table->timestamps();
         });
