@@ -50,6 +50,7 @@ class MicrosoftCalendarController extends Controller
     }
 
     $tokens = $response->json();
+    \Log::info('Microsoft access token in session:', ['token' => $tokens]);
 
     session(['microsoft_access_token' => $tokens['access_token']]);
 
