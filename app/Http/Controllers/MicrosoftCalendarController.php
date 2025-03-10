@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\MicrosoftAuth;
 use App\Models\User;
 use App\Models\Activity;
+use Illuminate\Support\Facades\Log;
 
 class MicrosoftCalendarController extends Controller
 {
