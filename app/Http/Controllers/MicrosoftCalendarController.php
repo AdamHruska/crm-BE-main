@@ -60,9 +60,6 @@ class MicrosoftCalendarController extends Controller
 
 public function callbackAzure(Request $request)
 {
-    // Log the full request
-    Log::info("Received request: " . $request->fullUrl());
-
     $code = $request->query('code');
 
     if (!$code) {
@@ -80,16 +77,28 @@ public function callbackAzure(Request $request)
     ]);
 
     if ($response->failed()) {
-        return response()->json(['error' => 'Failed to retrieve access token'], 400);
+        return response()->json(['error' => 'Failed to retrieve access token', 'details' => $response->json()], 400);
     }
 
-    $tokens = $response->json();
-
-    // Store the access token in a cookie for 1 hour
+    $tokens = $response->json(); // Get tokens from the response, not from the request
+    
+    // Create a secure, HTTP-only cookie
     $minutes = 60; // Cookie duration in minutes
-    $cookie = cookie('microsoft_access_token', $tokens['access_token'], $minutes);
+    $cookie = cookie('microsoft_access_token', $tokens['access_token'], $minutes, null, null, true, true);
 
-    return redirect()->to(env('FRONTEND_URL') . '/calendar?status=success')->cookie($cookie);
+    // Also store refresh token if available
+    $refreshCookie = null;
+    if (isset($tokens['refresh_token'])) {
+        $refreshCookie = cookie('microsoft_refresh_token', $tokens['refresh_token'], 43200, null, null, true, true); // 30 days
+    }
+
+    $redirect = redirect()->to(env('FRONTEND_URL') . '/calendar?status=success')->cookie($cookie);
+    
+    if ($refreshCookie) {
+        $redirect->cookie($refreshCookie);
+    }
+    
+    return $redirect;
 }
 
 public function getEvents(Request $request)
@@ -98,7 +107,18 @@ public function getEvents(Request $request)
     $accessToken = $request->cookie('microsoft_access_token');
 
     if (!$accessToken) {
-        return response()->json(['error' => 'Not authenticated with Microsoft'], 401);
+        // Try to refresh the token if refresh token is available
+        $refreshToken = $request->cookie('microsoft_refresh_token');
+        if ($refreshToken) {
+            $newToken = $this->refreshAccessToken($refreshToken);
+            if ($newToken) {
+                $accessToken = $newToken;
+            } else {
+                return response()->json(['error' => 'Access token expired and refresh failed'], 401);
+            }
+        } else {
+            return response()->json(['error' => 'Not authenticated with Microsoft'], 401);
+        }
     }
 
     // Fetch events from Microsoft Graph API
@@ -119,6 +139,7 @@ public function getEvents(Request $request)
 
     return $eventsResponse->json();
 }
+
 
 // public function getEvents()
 // {
