@@ -77,28 +77,20 @@ public function callbackAzure(Request $request)
     ]);
 
     if ($response->failed()) {
+        Log::error('Failed to retrieve Microsoft token: ' . json_encode($response->json()));
         return response()->json(['error' => 'Failed to retrieve access token', 'details' => $response->json()], 400);
     }
 
-    $tokens = $response->json(); // Get tokens from the response, not from the request
+    $tokens = $response->json(); // Get tokens from the response
     
-    // Create a secure, HTTP-only cookie
-    $minutes = 60; // Cookie duration in minutes
-    $cookie = cookie('microsoft_access_token', $tokens['access_token'], $minutes, null, null, true, true);
-
-    // Also store refresh token if available
-    $refreshCookie = null;
-    if (isset($tokens['refresh_token'])) {
-        $refreshCookie = cookie('microsoft_refresh_token', $tokens['refresh_token'], 43200, null, null, true, true); // 30 days
-    }
-
-    $redirect = redirect()->to(env('FRONTEND_URL') . '/calendar?status=success')->cookie($cookie);
+    // Add debug logging
+    Log::info('Microsoft tokens received', ['access_token_length' => strlen($tokens['access_token'] ?? 'none')]);
     
-    if ($refreshCookie) {
-        $redirect->cookie($refreshCookie);
-    }
+    // Create a cookie with appropriate settings for cross-domain use on Vercel
+    $cookie = cookie('microsoft_access_token', $tokens['access_token'], 60, '/', null, null, false);
     
-    return $redirect;
+    // Return response with cookie
+    return redirect()->to(env('FRONTEND_URL') . '/calendar?status=success')->withCookie($cookie);
 }
 
 public function getEvents(Request $request)
@@ -106,20 +98,17 @@ public function getEvents(Request $request)
     // Get the access token from the cookie
     $accessToken = $request->cookie('microsoft_access_token');
 
+    // Add debugging
+    Log::info('Retrieving Microsoft access token from cookie', [
+        'token_exists' => !empty($accessToken),
+        'token_length' => $accessToken ? strlen($accessToken) : 0,
+        'cookies' => $request->cookies->all() // Log all available cookies
+    ]);
+
     if (!$accessToken) {
-        // Try to refresh the token if refresh token is available
-        $refreshToken = $request->cookie('microsoft_refresh_token');
-        if ($refreshToken) {
-            $newToken = $this->refreshAccessToken($refreshToken);
-            if ($newToken) {
-                $accessToken = $newToken;
-            } else {
-                return response()->json(['error' => 'Access token expired and refresh failed'], 401);
-            }
-        } else {
-            return response()->json(['error' => 'Not authenticated with Microsoft'], 401);
-        }
+        return response()->json(['error' => 'Not authenticated with Microsoft', 'debug' => 'No token in cookie'], 401);
     }
+
 
     // Fetch events from Microsoft Graph API
     $startDateTime = date('Y-m-d\TH:i:s\Z', strtotime('-6 months'));
