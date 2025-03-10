@@ -21,6 +21,11 @@ class MicrosoftCalendarController extends Controller
         return response()->json(['error' => 'Authorization code not provided'], 400);
     }
 
+    Log::info("Client ID: " . env('AZURE_CLIENT_ID'));
+    Log::info("Client Secret: " . env('AZURE_CLIENT_SECRET')); // Don't log secret in production!
+    Log::info("Redirect URI: " . env('AZURE_REDIRECT_URI'));
+
+
     $response = Http::asForm()->post('https://login.microsoftonline.com/common/oauth2/v2.0/token', [
         'client_id' => env('AZURE_CLIENT_ID'),
         'client_secret' => env('AZURE_CLIENT_SECRET'),
