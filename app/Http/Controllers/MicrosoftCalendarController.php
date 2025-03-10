@@ -16,6 +16,12 @@ class MicrosoftCalendarController extends Controller
 
     public function callbackAzure(Request $request)
 {
+    // Log the full request
+    Log::info("Received request: " . $request->fullUrl());
+
+    // Log query parameters
+    Log::info("Query parameters: " . json_encode($request->query()));
+
     $code = $request->query('code');
 
     if (!$code) {
