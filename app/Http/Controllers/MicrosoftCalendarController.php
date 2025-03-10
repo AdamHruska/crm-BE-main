@@ -10,17 +10,58 @@ use App\Models\MicrosoftAuth;
 use App\Models\User;
 use App\Models\Activity;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cookie;
 
 class MicrosoftCalendarController extends Controller
 {
 
-    public function callbackAzure(Request $request)
+//     public function callbackAzure(Request $request)
+// {
+//     // Log the full request
+//     Log::info("Received request: " . $request->fullUrl());
+
+//     // Log query parameters
+//     Log::info("Query parameters: " . json_encode($request->query()));
+
+//     $code = $request->query('code');
+
+//     if (!$code) {
+//         return response()->json(['error' => 'Authorization code not provided'], 400);
+//     }
+
+//     Log::info("Client ID: " . env('AZURE_CLIENT_ID'));
+//     Log::info("Client Secret: " . env('AZURE_CLIENT_SECRET')); // Don't log secret in production!
+//     Log::info("Redirect URI: " . env('AZURE_REDIRECT_URI'));
+
+
+//     $response = Http::asForm()->post('https://login.microsoftonline.com/common/oauth2/v2.0/token', [
+//         'client_id' => env('AZURE_CLIENT_ID'),
+//         'client_secret' => env('AZURE_CLIENT_SECRET'),
+//         'redirect_uri' => env('AZURE_REDIRECT_URI'),
+//         'grant_type' => 'authorization_code',
+//         'code' => $code,
+//         'scope' => 'offline_access Calendars.Read Calendars.Read.Shared OnlineMeetings.Read',
+//     ]);
+
+//     if ($response->failed()) {
+//         return response()->json([
+//             'error' => 'Failed to retrieve access token',
+//             'details' => $response->json()
+//         ], 400);
+//     }
+
+//     $tokens = $response->json();
+//     \Log::info('Microsoft access token in session:', ['token' => $tokens]);
+
+//     session(['microsoft_access_token' => $tokens['access_token']]);
+
+//     return redirect()->to(env('FRONTEND_URL') . '/calendar?status=success');
+// }
+
+public function callbackAzure(Request $request)
 {
     // Log the full request
     Log::info("Received request: " . $request->fullUrl());
-
-    // Log query parameters
-    Log::info("Query parameters: " . json_encode($request->query()));
 
     $code = $request->query('code');
 
@@ -28,11 +69,7 @@ class MicrosoftCalendarController extends Controller
         return response()->json(['error' => 'Authorization code not provided'], 400);
     }
 
-    Log::info("Client ID: " . env('AZURE_CLIENT_ID'));
-    Log::info("Client Secret: " . env('AZURE_CLIENT_SECRET')); // Don't log secret in production!
-    Log::info("Redirect URI: " . env('AZURE_REDIRECT_URI'));
-
-
+    // Request the access token from Azure
     $response = Http::asForm()->post('https://login.microsoftonline.com/common/oauth2/v2.0/token', [
         'client_id' => env('AZURE_CLIENT_ID'),
         'client_secret' => env('AZURE_CLIENT_SECRET'),
@@ -43,34 +80,31 @@ class MicrosoftCalendarController extends Controller
     ]);
 
     if ($response->failed()) {
-        return response()->json([
-            'error' => 'Failed to retrieve access token',
-            'details' => $response->json()
-        ], 400);
+        return response()->json(['error' => 'Failed to retrieve access token'], 400);
     }
 
     $tokens = $response->json();
-    \Log::info('Microsoft access token in session:', ['token' => $tokens]);
 
-    session(['microsoft_access_token' => $tokens['access_token']]);
+    // Store the access token in a cookie for 1 hour
+    $minutes = 60; // Cookie duration in minutes
+    $cookie = cookie('microsoft_access_token', $tokens['access_token'], $minutes);
 
-    return redirect()->to(env('FRONTEND_URL') . '/calendar?status=success');
+    return redirect()->to(env('FRONTEND_URL') . '/calendar?status=success')->cookie($cookie);
 }
 
-
-public function getEvents()
+public function getEvents(Request $request)
 {
-    $accessToken = session('microsoft_access_token');
+    // Get the access token from the cookie
+    $accessToken = $request->cookie('microsoft_access_token');
 
     if (!$accessToken) {
         return response()->json(['error' => 'Not authenticated with Microsoft'], 401);
     }
 
-    // Get current date in UTC
+    // Fetch events from Microsoft Graph API
     $startDateTime = date('Y-m-d\TH:i:s\Z', strtotime('-6 months'));
     $endDateTime = date('Y-m-d\TH:i:s\Z', strtotime('+6 months'));
 
-    // Fetch the newest events by ordering in descending order
     $eventsResponse = Http::withHeaders([
         'Authorization' => 'Bearer ' . $accessToken,
         'Accept' => 'application/json',
@@ -79,15 +113,43 @@ public function getEvents()
         'startDateTime' => $startDateTime,
         'endDateTime' => $endDateTime,
         '$select' => 'subject,start,end,location,calendar,onlineMeeting,isOnlineMeeting,onlineMeetingUrl,body,attendees',
-        '$orderby' => 'start/dateTime desc', // Order by newest first
+        '$orderby' => 'start/dateTime desc',
         '$top' => 100,
     ]);
 
-    // Log the full response for debugging
-    \Log::info('Events Response:', $eventsResponse->json());
-
     return $eventsResponse->json();
 }
+
+// public function getEvents()
+// {
+//     $accessToken = session('microsoft_access_token');
+
+//     if (!$accessToken) {
+//         return response()->json(['error' => 'Not authenticated with Microsoft'], 401);
+//     }
+
+//     // Get current date in UTC
+//     $startDateTime = date('Y-m-d\TH:i:s\Z', strtotime('-6 months'));
+//     $endDateTime = date('Y-m-d\TH:i:s\Z', strtotime('+6 months'));
+
+//     // Fetch the newest events by ordering in descending order
+//     $eventsResponse = Http::withHeaders([
+//         'Authorization' => 'Bearer ' . $accessToken,
+//         'Accept' => 'application/json',
+//         'Prefer' => 'outlook.timezone="UTC"'
+//     ])->get('https://graph.microsoft.com/v1.0/me/calendarview', [
+//         'startDateTime' => $startDateTime,
+//         'endDateTime' => $endDateTime,
+//         '$select' => 'subject,start,end,location,calendar,onlineMeeting,isOnlineMeeting,onlineMeetingUrl,body,attendees',
+//         '$orderby' => 'start/dateTime desc', // Order by newest first
+//         '$top' => 100,
+//     ]);
+
+//     // Log the full response for debugging
+//     \Log::info('Events Response:', $eventsResponse->json());
+
+//     return $eventsResponse->json();
+// }
 
     
 
